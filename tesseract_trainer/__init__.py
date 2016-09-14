@@ -18,7 +18,6 @@ import glob
 from os.path import join, exists
 
 
-
 # list of files generated during the training procedure
 GENERATED_DURING_TRAINING = ['unicharset', 'pffmtable', 'Microfeat', 'inttemp', 'normproto']
 
