@@ -1,6 +1,6 @@
-TesseractTrainer
+tesseract-trainer
 ================
-by Balthazar Rouberol - Mor Consulting, rouberol.b@gmail.com
+Forked from TesseractTrainer 0.1.1 by Balthazar Rouberol - Mor Consulting, rouberol.b@gmail.com
 
 TesseractTrainer is a simple Python API, taking over the tedious process of manually training Tesseract3,
 as described in the wiki page https://code.google.com/p/tesseract-ocr/wiki/TrainingTesseract3.
