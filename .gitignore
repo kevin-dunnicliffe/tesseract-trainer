@@ -1,0 +1,4 @@
+*.pyc
+dist/*
+build/*
+tesseract_trainer.egg-info/*

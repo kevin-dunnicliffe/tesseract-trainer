@@ -4,8 +4,8 @@ of training Tesseract 3described in the Tesseract Wiki:
 https://code.google.com/p/tesseract-ocr/wiki/TrainingTesseract3
 """
 
-__version__ = '0.1.1'
-__author__ = 'Balthazar Rouberol, rouberol.b@gmail.com'
+__version__ = '0.2.0'
+__author__ = 'Kevin Dunnicliffe kevin@kdassoc.com'
 
 import shutil
 import os

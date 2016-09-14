@@ -1,0 +1,32 @@
+#!/bin/bash
+# train
+# (no args)
+# I perform training of the Tesseract 3 OCR engine on the 'lineprinter' font
+# and training data in this folder.
+
+if ! test -x /usr/local/bin/tesstrain ; then
+  echo >&2 "tesstrain executable does not exist. Install from https://github.com/HarshUpadhyay/TesseractTrainer"
+  exit 1
+fi
+
+# all the stuuf I need is already in this folder
+TESSERACT_LANG="eng"
+TRAINING_TEXT="kevin-training-text.txt"
+FONT_PATH="lineprinterv.ttf"
+FONT_NAME="lineprinter"
+FONT_PROPERTIES="font_properties"
+EXPERIENCE_NUMBER=0
+FONT_SIZE=22    # pixels
+TESSDATA_PATH=/usr/share/tessdata
+
+tesstrain \
+  --tesseract-lang $TESSERACT_LANG \
+  --training-text $TRAINING_TEXT \
+  --font-path $FONT_PATH \
+  --font-name $FONT_NAME \
+  --font-properties $FONT_PROPERTIES \
+  --experience_number $EXPERIENCE_NUMBER \
+  --font-size $FONT_SIZE \
+  --tessdata-path $TESSDATA_PATH \
+  --verbose
+

@@ -7,17 +7,16 @@ VERSION = re.search("__version__ = '([^']+)'", open(
 ).read().strip()).group(1)
 
 setup(
-    name="TesseractTrainer",
+    name="tesseract-trainer",
     version=VERSION,
     license=open('LICENSE.txt').read(),
     description='A small framework taking over the manual tesseract training process described in the Tesseract Wiki',
-    author="Balthazar Rouberol",
-    author_email='rouberol.b@gmail.com',
-    url='https://github.com/BaltoRouberol/TesseractTrainer',
+    author="Kevin Dunnicliffe",
+    author_email='kevin@kdassoc.com',
     packages=['tesseract_trainer'],
     install_requires=['Pillow>=1.1.7'],
     keywords=['tesseract', 'OCR', 'optical character recogniton', 'training'],
-    scripts=['tesseract_trainer/tesstrain'],
+    scripts=['tesseract_trainer/tesstrain','train'],
     classifiers=[
            'Development Status :: 3 - Alpha',
            'Environment :: Console',
@@ -27,10 +26,10 @@ setup(
            'Operating System :: POSIX :: Linux',
            'Operating System :: Unix',
            'Operating System :: MacOS :: MacOS X',
-           'Programming Language :: Python :: 2.6',
            'Programming Language :: Python :: 2.7',
+           'Programming Language :: Python :: 3.5',
            'Topic :: Scientific/Engineering :: Artificial Intelligence',
            'Topic :: Scientific/Engineering :: Image Recognition',
         ],
-    long_description=open('README.txt').read(),  # Long description: content of README.txt (DRY),
+    long_description=open('README.md').read(),  # Long description: content of README.md (DRY),
 )
