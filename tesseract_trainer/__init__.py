@@ -115,8 +115,8 @@ class MultiPageTif(object):
         for word in self.text:
             word += ' '  # add a space between each word
             wordsize_w, wordsize_h = self.font.getsize(word)
-            wordsize_w  = len(word) * 28
-            wordsize_h  = 28
+            wordsize_w  = len(word) * 28  # allow for each fixed-width character cell of 28 pixels
+            wordsize_h  = 28              # allow for each row being a fixed height of 28 pixels
             # Check if word can fit the line, if not, newline
             # if newline, check if the newline fits the page
             # if not, save the current page and create a new one
@@ -138,27 +138,44 @@ class MultiPageTif(object):
             # write word
             for char in word:
                 char_w, char_h = self.font.getsize(char)  # get character height / width
-                char_w = 28
-                char_h = 28
-                char_x0, char_y0 = x_pos, y_pos  # character top-left corner coordinates
-                char_x1, char_y1 = x_pos + char_w, y_pos + char_h  # character bottom-roght corner coordinates
-                draw.text((x_pos, y_pos), char, fill="black", font=self.font)  # write character in tif file
+                # The following coordinates are PIL-origin
+                char_left      = x_pos
+                char_top       = y_pos
+
+                # determine the actual glyph dimensions, by generating a glyph image and calculating its bounding box
+                glyph_image    = Image.new("L", (char_w, char_h), color='black')
+                glyph_draw     = ImageDraw.Draw(glyph_image)
+                glyph_draw.text((0,0),char,fill="white",font=self.font)  # write the character into single-glyph image, white on black
+                try:     (l,t,r,b) = glyph_image.getbbox()
+                except:  (l,t,r,b) = (0,0,0,0)
+                # glyph_image.save("lineprinterv.glyphs/c%02X.tiff" % (ord(char)))
+                actual_char_w = r - l
+                actual_char_h = b - t
+                # re-compute the Right, Bottom, Left and Top coordinates to be used in the boxline.
+                char_left      = x_pos
+                char_bottom    = y_pos + b 
+                char_right     = char_left + actual_char_w
+                char_top       = y_pos + t
+                print("font.getsize(%s) -> (%d,%d) bbox -> (L=%d,T=%d,R=%d,B=%d) actual=(%d,%d) char=(L=%d,T=%d,R=%d,B=%d)" 
+                      % (char,char_w,char_h,l,t,r,b,actual_char_w,actual_char_h,char_left,char_top,char_right,char_bottom))
+                draw.text((x_pos, y_pos), char, fill="black", font=self.font)  # write character in page tif file
                 if char != ' ':
-                    # draw.rectangle([(char_x0, char_y0),(char_x1, char_y1)], outline="red")
-                    self._write_boxline(char, char_x0, char_y0, char_x1, char_y1, page_nb)  # add coordinates to boxfile
-                x_pos += char_w
+                    self._write_boxline(char, char_left, char_top, char_right, char_bottom, page_nb)  # add coordinates to boxfile
+                x_pos += 28           # move horizontally by a fixed width to the next char cell
         self._save_tif(tif, page_nb)  # save last tif
 
-    def _write_boxline(self, char, char_x0, char_y0, char_x1, char_y1, page_nb):
+
+    def _write_boxline(self, char, char_left, char_top, char_right, char_bottom, page_nb):
         """ Generate a boxfile line given a character coordinates, and append it to the
             self.boxlines list.
         """
         # top-left corner coordinates in tesseract particular frame
-        tess_char_x0, tess_char_y0 = pil_coord_to_tesseract(char_x0, char_y0, self.H)
+        tess_char_left,  tess_char_top    = pil_coord_to_tesseract(char_left, char_top, self.H)
         # bottom-right corner coordinates in tessseract particular frame
-        tess_char_x1, tess_char_y1 = pil_coord_to_tesseract(char_x1, char_y1, self.H)
-        boxline = '%s %d %d %d %d %d' % (char, tess_char_x0, tess_char_y1, tess_char_x1, tess_char_y0, page_nb)
+        tess_char_right, tess_char_bottom = pil_coord_to_tesseract(char_right, char_bottom, self.H)
+        boxline = '%s %d %d %d %d %d' % (char, tess_char_left, tess_char_bottom, tess_char_right, tess_char_top, page_nb)
         self.boxlines.append(boxline)
+
 
     def _multipage_tif(self):
         """ Generate a multipage tif from all the generated tifs.
@@ -243,7 +260,7 @@ class TesseractTrainer:
         # The prefix of all generated tifs, boxfiles, training files (ex: eng.helveticanarrow.exp0.box)
         self.prefix = '%s.%s.exp%s' % (self.dictionary_name, self.font_name, str(self.exp_number))
 
-        # Local path to the 'font_propperties' file
+        # Local path to the 'font_properties' file
         self.font_properties = font_properties
         with open(self.font_properties, 'r') as fp:
             if self.font_name not in fp.read().split():
@@ -264,7 +281,7 @@ class TesseractTrainer:
         """ Generate a multipage tif, filled with the training text and generate a boxfile
             from the coordinates of the characters inside it
         """
-        mp = MultiPageTif(self.training_text, 3500, 1024, 20, 20, self.font_name, self.font_path,
+        mp = MultiPageTif(self.training_text, 4000, 1500, 20, 20, self.font_name, self.font_path,
             self.font_size, self.exp_number, self.dictionary_name, self.verbose)
         mp.generate_tif()  # generate a multi-page tif, filled with self.training_text
         mp.generate_boxfile()  # generate the boxfile, associated with the generated tif
@@ -373,6 +390,9 @@ def display_output(run, verbose):
     """
     out, err = run.communicate()
     if verbose:
-        print(out.strip())
+        out = out.decode("utf-8")
+        print(out)
         if err:
-            print(err.strip())
+            err = err.decode("utf-8")
+            print(err)
+

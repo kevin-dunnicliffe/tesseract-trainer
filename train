@@ -19,7 +19,7 @@ EXPERIENCE_NUMBER=0
 FONT_SIZE=22    # pixels
 TESSDATA_PATH=/usr/share/tessdata
 
-tesstrain \
+/usr/local/bin/tesstrain \
   --tesseract-lang $TESSERACT_LANG \
   --training-text $TRAINING_TEXT \
   --font-path $FONT_PATH \
